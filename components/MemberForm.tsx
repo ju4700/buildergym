@@ -21,7 +21,6 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
     admissionDate: member?.admissionDate ? new Date(member.admissionDate).toISOString().split('T')[0] : '',
     bloodGroup: member?.bloodGroup || '',
     mobileNumber: member?.mobileNumber || '',
-    idNumber: member?.idNumber || '',
     age: member?.age || '',
     referenceId: member?.referenceId || '',
     height: member?.height || '',
@@ -108,18 +107,7 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
                 id="mobileNumber"
                 value={formData.mobileNumber}
                 onChange={(e) => handleChange('mobileNumber', e.target.value)}
-                placeholder="Enter mobile number"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="idNumber">ID Number *</Label>
-              <Input
-                id="idNumber"
-                value={formData.idNumber}
-                onChange={(e) => handleChange('idNumber', e.target.value)}
-                placeholder="Enter ID number"
+                placeholder="Enter mobile number (e.g., +880-1711-123456)"
                 required
               />
             </div>

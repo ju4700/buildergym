@@ -7,7 +7,6 @@ export interface IMember {
   admissionDate: Date;
   bloodGroup: string;
   mobileNumber: string;
-  idNumber: string;
   age: number;
   referenceId: string;
   height: number;
@@ -38,10 +37,6 @@ const MemberSchema = new mongoose.Schema<IMember>({
     required: true,
   },
   mobileNumber: {
-    type: String,
-    required: true,
-  },
-  idNumber: {
     type: String,
     required: true,
   },
