@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Users, DollarSign, Plus, BarChart3 } from 'lucide-react';
+import { Menu, X, Users, DollarSign, Plus, BarChart3, Dumbbell } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: string;
@@ -23,7 +23,8 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            <Dumbbell className="h-6 w-6 text-gray-900" />
             <h1 className="text-xl font-bold text-gray-900">Builder Gym</h1>
           </div>
 
