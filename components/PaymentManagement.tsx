@@ -178,10 +178,17 @@ export default function PaymentManagement({
                           onClick={() => startEditing(payment)}
                           className="text-gray-900 hover:text-gray-700 font-medium"
                         >
-                          {formatCurrency(payment.amount)}
-                          {payment.isFirstPayment && (
-                            <span className="text-xs text-gray-500 ml-1">(Admission + Monthly)</span>
-                          )}
+                          <div>
+                            <div>{formatCurrency(payment.amount)}</div>
+                            {payment.isFirstPayment && (
+                              <div className="text-xs text-gray-500">(Admission + Monthly)</div>
+                            )}
+                            {payment.accumulatedDues && payment.accumulatedDues > 0 && (
+                              <div className="text-xs text-orange-600">
+                                ({formatCurrency(payment.monthlyFee)} current + {formatCurrency(payment.accumulatedDues)} previous)
+                              </div>
+                            )}
+                          </div>
                         </button>
                       )}
                     </td>

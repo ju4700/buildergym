@@ -35,16 +35,36 @@ export async function POST(request: NextRequest) {
       });
 
       if (!existingPayment) {
+        // Calculate accumulated unpaid amounts from previous months
+        const unpaidPayments = await Payment.find({
+          memberId: member.id,
+          status: 'due',
+          $or: [
+            { year: { $lt: currentYear } },
+            { 
+              year: currentYear,
+              month: { $ne: currentMonth }
+            }
+          ]
+        });
+
+        // Calculate total unpaid amount
+        const totalUnpaidAmount = unpaidPayments.reduce((sum, payment) => sum + payment.amount, 0);
+        
+        // New payment amount = monthly fee + accumulated unpaid amount
+        const newPaymentAmount = monthlyFee + totalUnpaidAmount;
+
         const payment = new Payment({
           memberId: member.id,
           memberName: member.name,
-          amount: monthlyFee, // Always 500 BDT for monthly dues
-          monthlyFee: monthlyFee,
+          amount: newPaymentAmount, // Monthly fee + accumulated unpaid amounts
+          monthlyFee: monthlyFee, // Keep track of the base monthly fee
           dueDate: new Date(currentYear, currentDate.getMonth(), 1),
           month: currentMonth,
           year: currentYear,
           status: 'due',
           isFirstPayment: false, // This is not the first payment (no admission fee)
+          accumulatedDues: totalUnpaidAmount, // Track how much is from previous months
         });
 
         await payment.save();

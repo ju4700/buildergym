@@ -4,7 +4,7 @@ export interface IPayment {
   _id?: string;
   memberId: string;
   memberName: string;
-  amount: number; // Amount in BDT (Bangladeshi Taka)
+  amount: number; // Total amount in BDT (monthly fee + accumulated dues)
   monthlyFee: number; // Standard monthly fee in BDT
   dueDate: Date;
   paidDate?: Date;
@@ -12,6 +12,7 @@ export interface IPayment {
   month: string;
   year: number;
   isFirstPayment?: boolean; // True if this includes admission fee
+  accumulatedDues?: number; // Amount accumulated from previous unpaid months
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -58,6 +59,10 @@ const PaymentSchema = new mongoose.Schema<IPayment>({
   isFirstPayment: {
     type: Boolean,
     default: false,
+  },
+  accumulatedDues: {
+    type: Number,
+    default: 0,
   },
 }, {
   timestamps: true,

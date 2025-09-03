@@ -12,11 +12,37 @@ export async function PUT(request: NextRequest, context: RouteParams) {
     await dbConnect();
     const body = await request.json();
     
+    const payment = await Payment.findById(id);
+    if (!payment) {
+      return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
+    }
+
     const updateData = { ...body };
     
     // If marking as paid, add paidDate
     if (body.status === 'paid' && !body.paidDate) {
       updateData.paidDate = new Date();
+      
+      // If this payment includes accumulated dues, mark all previous unpaid payments as paid
+      if (payment.accumulatedDues && payment.accumulatedDues > 0) {
+        await Payment.updateMany(
+          {
+            memberId: payment.memberId,
+            status: 'due',
+            $or: [
+              { year: { $lt: payment.year } },
+              { 
+                year: payment.year,
+                month: { $ne: payment.month }
+              }
+            ]
+          },
+          {
+            status: 'paid',
+            paidDate: new Date()
+          }
+        );
+      }
     }
     
     // If marking as due, remove paidDate
@@ -24,12 +50,9 @@ export async function PUT(request: NextRequest, context: RouteParams) {
       updateData.paidDate = null;
     }
 
-    const payment = await Payment.findByIdAndUpdate(id, updateData, { new: true });
-    if (!payment) {
-      return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
-    }
+    const updatedPayment = await Payment.findByIdAndUpdate(id, updateData, { new: true });
 
-    return NextResponse.json(payment);
+    return NextResponse.json(updatedPayment);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update payment' }, { status: 500 });
   }
