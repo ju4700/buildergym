@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, DollarSign, Calendar, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Users, DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import { IMember } from '@/models/Member';
 import { IPayment } from '@/models/Payment';
-import { formatCurrency, calculateOverdueMonths } from '@/lib/paymentUtils';
+import { formatCurrency } from '@/lib/paymentUtils';
 
 interface DashboardProps {
   members: IMember[];
@@ -18,7 +18,6 @@ export default function Dashboard({ members, payments }: DashboardProps) {
     totalMembers: 0,
     paidThisMonth: 0,
     dueThisMonth: 0,
-    overdueMembers: 0,
     totalRevenue: 0,
     pendingRevenue: 0,
   });
@@ -37,16 +36,10 @@ export default function Dashboard({ members, payments }: DashboardProps) {
     const totalRevenue = paidPayments.reduce((sum, p) => sum + p.amount, 0);
     const pendingRevenue = duePayments.reduce((sum, p) => sum + p.amount, 0);
 
-    // Calculate overdue members
-    const overdueMembers = members.filter(member => 
-      calculateOverdueMonths(payments, member.id) > 0
-    ).length;
-
     setStats({
       totalMembers: members.length,
       paidThisMonth: paidPayments.length,
       dueThisMonth: duePayments.length,
-      overdueMembers,
       totalRevenue,
       pendingRevenue,
     });
@@ -73,13 +66,6 @@ export default function Dashboard({ members, payments }: DashboardProps) {
       icon: Calendar,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50',
-    },
-    {
-      title: 'Overdue Members',
-      value: stats.overdueMembers,
-      icon: AlertTriangle,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
     },
     {
       title: 'Monthly Revenue',

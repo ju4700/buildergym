@@ -44,9 +44,9 @@ export default function PaymentManagement({
   const totalMembersWithCurrentPayments = currentMonthPayments.length;
 
   const filteredPayments = payments.filter(payment =>
-    payment.memberName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.memberId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.month.toLowerCase().includes(searchTerm.toLowerCase())
+    (payment.memberName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (payment.memberId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (payment.month || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAmountUpdate = (paymentId: string, amount: number, status: 'paid' | 'due') => {
