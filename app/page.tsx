@@ -175,9 +175,17 @@ export default function Home() {
     setActiveTab('members');
   };
 
+  const handleTabChange = (tab: string) => {
+    // Clear editing state when switching to add-member from navbar
+    if (tab === 'add-member' && editingMember) {
+      setEditingMember(null);
+    }
+    setActiveTab(tab);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navbar activeTab={activeTab} onTabChange={handleTabChange} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'dashboard' && (

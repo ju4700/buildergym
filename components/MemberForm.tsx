@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IMember } from '@/models/Member';
+import { generateMemberId, checkMemberIdAvailability } from '@/lib/memberIdUtils';
 
 interface MemberFormProps {
   member?: IMember;
@@ -30,8 +31,107 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
     fattyFigure: member?.fattyFigure || '',
   });
 
+  const [idStatus, setIdStatus] = useState<{
+    isChecking: boolean;
+    isAvailable: boolean | null;
+    message: string;
+    suggestion?: string;
+  }>({
+    isChecking: false,
+    isAvailable: null,
+    message: '',
+  });
+
+  // Auto-generate ID for new members
+  useEffect(() => {
+    if (!member) {
+      const autoId = generateMemberId();
+      setFormData(prev => ({ ...prev, id: autoId }));
+      checkIdAvailability(autoId);
+    }
+  }, [member]);
+
+  // Reset form when member prop changes (including when it becomes null/undefined)
+  useEffect(() => {
+    setFormData({
+      id: member?.id || '',
+      name: member?.name || '',
+      admissionDate: member?.admissionDate ? new Date(member.admissionDate).toISOString().split('T')[0] : '',
+      bloodGroup: member?.bloodGroup || '',
+      mobileNumber: member?.mobileNumber || '',
+      age: member?.age || '',
+      referenceId: member?.referenceId || '',
+      height: member?.height || '',
+      weight: member?.weight || '',
+      admissionFee: member?.admissionFee || '',
+      normalFigure: member?.normalFigure || '',
+      fattyFigure: member?.fattyFigure || '',
+    });
+    
+    // Reset ID status when switching between add/edit
+    if (member) {
+      setIdStatus({
+        isChecking: false,
+        isAvailable: true,
+        message: 'Existing member ID',
+      });
+    } else {
+      setIdStatus({
+        isChecking: false,
+        isAvailable: null,
+        message: '',
+      });
+    }
+  }, [member]);
+
+  // Debounced ID availability check
+  useEffect(() => {
+    if (!formData.id || member) return; // Skip if editing existing member
+
+    const timeoutId = setTimeout(() => {
+      checkIdAvailability(formData.id);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [formData.id, member]);
+
+  const checkIdAvailability = async (memberId: string) => {
+    if (!memberId) return;
+
+    setIdStatus(prev => ({ ...prev, isChecking: true }));
+
+    try {
+      const result = await checkMemberIdAvailability(memberId);
+      setIdStatus({
+        isChecking: false,
+        isAvailable: result.available,
+        message: result.message,
+        suggestion: result.suggestion,
+      });
+    } catch (error) {
+      setIdStatus({
+        isChecking: false,
+        isAvailable: false,
+        message: 'Error checking ID availability',
+      });
+    }
+  };
+
+  const useSuggestion = () => {
+    if (idStatus.suggestion) {
+      setFormData(prev => ({ ...prev, id: idStatus.suggestion! }));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // For new members, check if ID is available before submitting
+    if (!member && !idStatus.isAvailable) {
+      alert('Please use an available Member ID before submitting.');
+      return;
+    }
+    
     onSubmit({
       ...formData,
       admissionDate: new Date(formData.admissionDate),
@@ -58,14 +158,58 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="id">Member ID *</Label>
-              <Input
-                id="id"
-                value={formData.id}
-                onChange={(e) => handleChange('id', e.target.value)}
-                placeholder="Enter unique member ID"
-                required
-                disabled={!!member}
-              />
+              <div className="space-y-2">
+                <Input
+                  id="id"
+                  value={formData.id}
+                  onChange={(e) => handleChange('id', e.target.value)}
+                  placeholder="Enter unique member ID"
+                  required
+                  disabled={!!member}
+                  className={
+                    !member && idStatus.isAvailable !== null
+                      ? idStatus.isAvailable
+                        ? 'border-green-500 focus:border-green-500'
+                        : 'border-red-500 focus:border-red-500'
+                      : ''
+                  }
+                />
+                {!member && (
+                  <div className="text-sm">
+                    {idStatus.isChecking ? (
+                      <span className="text-gray-500">Checking availability...</span>
+                    ) : idStatus.isAvailable !== null ? (
+                      <div className="space-y-2">
+                        <span
+                          className={
+                            idStatus.isAvailable ? 'text-green-600' : 'text-red-600'
+                          }
+                        >
+                          {idStatus.message}
+                        </span>
+                        {!idStatus.isAvailable && idStatus.suggestion && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-600">
+                              Suggestion: {idStatus.suggestion}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={useSuggestion}
+                              className="text-xs px-2 py-1 h-6"
+                            >
+                              Use This
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-500">Auto-generated ID (editable)</span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -203,7 +347,10 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
             <Button 
               type="submit" 
               className="flex-1 bg-gray-900 hover:bg-gray-800 text-white"
-              disabled={isLoading}
+              disabled={
+                isLoading || 
+                (!member && (!idStatus.isAvailable || idStatus.isChecking))
+              }
             >
               {isLoading ? 'Saving...' : (member ? 'Update Member' : 'Add Member')}
             </Button>
