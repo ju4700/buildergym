@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Edit, Trash2, Calendar } from 'lucide-react';
 import { IMember } from '@/models/Member';
 import { IPayment } from '@/models/Payment';
+import { getPaymentStatusWithOverdue, formatCurrency } from '@/lib/paymentUtils';
 
 interface MembersTableProps {
   members: IMember[];
@@ -20,18 +21,8 @@ interface MembersTableProps {
 export default function MembersTable({ members, payments, onEdit, onDelete, isLoading }: MembersTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const getPaymentStatus = (memberId: string) => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
-    const currentYear = currentDate.getFullYear();
-
-    const payment = payments.find(p => 
-      p.memberId === memberId && 
-      p.month === currentMonth && 
-      p.year === currentYear
-    );
-
-    return payment?.status || 'due';
+  const getPaymentStatusInfo = (memberId: string) => {
+    return getPaymentStatusWithOverdue(payments, memberId);
   };
 
   const filteredMembers = members.filter(member =>
@@ -74,6 +65,7 @@ export default function MembersTable({ members, payments, onEdit, onDelete, isLo
                 <th className="text-left p-3 font-semibold text-gray-900 hidden sm:table-cell">Mobile</th>
                 <th className="text-left p-3 font-semibold text-gray-900 hidden md:table-cell">Blood Group</th>
                 <th className="text-left p-3 font-semibold text-gray-900 hidden lg:table-cell">Age</th>
+                <th className="text-left p-3 font-semibold text-gray-900 hidden xl:table-cell">Admission Fee</th>
                 <th className="text-left p-3 font-semibold text-gray-900">Payment Status</th>
                 <th className="text-left p-3 font-semibold text-gray-900">Actions</th>
               </tr>
@@ -91,17 +83,25 @@ export default function MembersTable({ members, payments, onEdit, onDelete, isLo
                   <td className="p-3 text-gray-700 hidden sm:table-cell">{member.mobileNumber}</td>
                   <td className="p-3 text-gray-700 hidden md:table-cell">{member.bloodGroup}</td>
                   <td className="p-3 text-gray-700 hidden lg:table-cell">{member.age}</td>
+                  <td className="p-3 text-gray-700 hidden xl:table-cell">{formatCurrency(member.admissionFee)}</td>
                   <td className="p-3">
-                    <Badge 
-                      variant={getPaymentStatus(member.id) === 'paid' ? 'default' : 'destructive'}
-                      className={
-                        getPaymentStatus(member.id) === 'paid' 
-                          ? 'bg-green-100 text-green-800 border-green-200' 
-                          : 'bg-red-100 text-red-800 border-red-200'
-                      }
-                    >
-                      {getPaymentStatus(member.id) === 'paid' ? 'Paid' : 'Due'}
-                    </Badge>
+                    {(() => {
+                      const statusInfo = getPaymentStatusInfo(member.id);
+                      return (
+                        <Badge 
+                          variant={statusInfo.status === 'paid' ? 'default' : 'destructive'}
+                          className={
+                            statusInfo.status === 'paid' 
+                              ? 'bg-green-100 text-green-800 border-green-200' 
+                              : statusInfo.status === 'overdue'
+                              ? 'bg-orange-100 text-orange-800 border-orange-200'
+                              : 'bg-red-100 text-red-800 border-red-200'
+                          }
+                        >
+                          {statusInfo.displayText}
+                        </Badge>
+                      );
+                    })()}
                   </td>
                   <td className="p-3">
                     <div className="flex gap-2">

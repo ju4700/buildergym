@@ -64,6 +64,7 @@ const MemberSchema = new mongoose.Schema<IMember>({
   admissionFee: {
     type: Number,
     required: true,
+    // Admission fee in BDT (Bangladeshi Taka)
   },
   normalFigure: {
     type: String,

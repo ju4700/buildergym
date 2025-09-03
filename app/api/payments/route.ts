@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     const currentDate = new Date();
     const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
     const currentYear = currentDate.getFullYear();
+    const monthlyFee = 500; // Standard monthly fee in BDT
     
     const members = await Member.find({});
     const generatedPayments = [];
@@ -37,11 +38,13 @@ export async function POST(request: NextRequest) {
         const payment = new Payment({
           memberId: member.id,
           memberName: member.name,
-          amount: 0, // Default amount
+          amount: monthlyFee, // Always 500 BDT for monthly dues
+          monthlyFee: monthlyFee,
           dueDate: new Date(currentYear, currentDate.getMonth(), 1),
           month: currentMonth,
           year: currentYear,
           status: 'due',
+          isFirstPayment: false, // This is not the first payment (no admission fee)
         });
 
         await payment.save();

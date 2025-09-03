@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, DollarSign, Calendar, TrendingUp } from 'lucide-react';
+import { Users, DollarSign, Calendar, TrendingUp, AlertTriangle } from 'lucide-react';
 import { IMember } from '@/models/Member';
 import { IPayment } from '@/models/Payment';
+import { formatCurrency, calculateOverdueMonths } from '@/lib/paymentUtils';
 
 interface DashboardProps {
   members: IMember[];
@@ -17,7 +18,9 @@ export default function Dashboard({ members, payments }: DashboardProps) {
     totalMembers: 0,
     paidThisMonth: 0,
     dueThisMonth: 0,
+    overdueMembers: 0,
     totalRevenue: 0,
+    pendingRevenue: 0,
   });
 
   useEffect(() => {
@@ -32,12 +35,20 @@ export default function Dashboard({ members, payments }: DashboardProps) {
     const paidPayments = currentMonthPayments.filter(p => p.status === 'paid');
     const duePayments = currentMonthPayments.filter(p => p.status === 'due');
     const totalRevenue = paidPayments.reduce((sum, p) => sum + p.amount, 0);
+    const pendingRevenue = duePayments.reduce((sum, p) => sum + p.amount, 0);
+
+    // Calculate overdue members
+    const overdueMembers = members.filter(member => 
+      calculateOverdueMonths(payments, member.id) > 0
+    ).length;
 
     setStats({
       totalMembers: members.length,
       paidThisMonth: paidPayments.length,
       dueThisMonth: duePayments.length,
+      overdueMembers,
       totalRevenue,
+      pendingRevenue,
     });
   }, [members, payments]);
 
@@ -60,20 +71,34 @@ export default function Dashboard({ members, payments }: DashboardProps) {
       title: 'Due This Month',
       value: stats.dueThisMonth,
       icon: Calendar,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-50',
+    },
+    {
+      title: 'Overdue Members',
+      value: stats.overdueMembers,
+      icon: AlertTriangle,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
     },
     {
       title: 'Monthly Revenue',
-      value: `$${stats.totalRevenue.toFixed(2)}`,
+      value: formatCurrency(stats.totalRevenue),
       icon: DollarSign,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
     },
+    {
+      title: 'Pending Revenue',
+      value: formatCurrency(stats.pendingRevenue),
+      icon: DollarSign,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
       {statCards.map((stat, index) => (
         <Card key={index} className="hover:shadow-md transition-shadow">
           <CardContent className="p-6">

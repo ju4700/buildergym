@@ -73,7 +73,12 @@ const PaymentSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: true,
-    default: 0,
+    default: 500,
+  },
+  monthlyFee: {
+    type: Number,
+    required: true,
+    default: 500,
   },
   dueDate: {
     type: Date,
@@ -94,6 +99,10 @@ const PaymentSchema = new mongoose.Schema({
   year: {
     type: Number,
     required: true,
+  },
+  isFirstPayment: {
+    type: Boolean,
+    default: false,
   },
 }, {
   timestamps: true,
@@ -215,15 +224,18 @@ async function seedBangladeshiMembers() {
         const currentDate = new Date();
         const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
         const currentYear = currentDate.getFullYear();
+        const monthlyFee = 500; // Monthly fee in BDT
 
         const payment = new Payment({
           memberId: member.id,
           memberName: member.name,
-          amount: 2000, // Monthly fee in BDT
+          amount: member.admissionFee + monthlyFee, // Admission fee + monthly fee for first payment
+          monthlyFee: monthlyFee,
           dueDate: new Date(currentYear, currentDate.getMonth(), 1),
           month: currentMonth,
           year: currentYear,
           status: 'due',
+          isFirstPayment: true,
         });
 
         await payment.save();

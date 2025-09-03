@@ -4,12 +4,14 @@ export interface IPayment {
   _id?: string;
   memberId: string;
   memberName: string;
-  amount: number;
+  amount: number; // Amount in BDT (Bangladeshi Taka)
+  monthlyFee: number; // Standard monthly fee in BDT
   dueDate: Date;
   paidDate?: Date;
   status: 'due' | 'paid';
   month: string;
   year: number;
+  isFirstPayment?: boolean; // True if this includes admission fee
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -26,7 +28,12 @@ const PaymentSchema = new mongoose.Schema<IPayment>({
   amount: {
     type: Number,
     required: true,
-    default: 0,
+    default: 500, // Default monthly fee in BDT
+  },
+  monthlyFee: {
+    type: Number,
+    required: true,
+    default: 500, // Standard monthly fee in BDT
   },
   dueDate: {
     type: Date,
@@ -47,6 +54,10 @@ const PaymentSchema = new mongoose.Schema<IPayment>({
   year: {
     type: Number,
     required: true,
+  },
+  isFirstPayment: {
+    type: Boolean,
+    default: false,
   },
 }, {
   timestamps: true,

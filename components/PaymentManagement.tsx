@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar, DollarSign, Search } from 'lucide-react';
 import { IPayment } from '@/models/Payment';
+import { formatCurrency } from '@/lib/paymentUtils';
 
 interface PaymentManagementProps {
   payments: IPayment[];
@@ -25,6 +26,22 @@ export default function PaymentManagement({
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPayment, setEditingPayment] = useState<string | null>(null);
   const [tempAmount, setTempAmount] = useState<number>(0);
+
+  // Check if monthly payments already generated for current month
+  const currentDate = new Date();
+  const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
+  const currentYear = currentDate.getFullYear();
+  
+  const nextMonth = new Date(currentYear, currentDate.getMonth() + 1);
+  const nextMonthName = nextMonth.toLocaleString('default', { month: 'long' });
+  const nextYear = nextMonth.getFullYear();
+  
+  const currentMonthPayments = payments.filter(p => 
+    p.month === currentMonth && p.year === currentYear
+  );
+  
+  const hasCurrentMonthPayments = currentMonthPayments.length > 0;
+  const totalMembersWithCurrentPayments = currentMonthPayments.length;
 
   const filteredPayments = payments.filter(payment =>
     payment.memberName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -62,15 +79,50 @@ export default function PaymentManagement({
             </div>
             <Button 
               onClick={onGenerateMonthlyDues}
-              disabled={isLoading}
-              className="bg-gray-900 hover:bg-gray-800 text-white"
+              disabled={isLoading || hasCurrentMonthPayments}
+              className={`${
+                hasCurrentMonthPayments 
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                  : 'bg-gray-900 hover:bg-gray-800 text-white'
+              }`}
+              title={
+                hasCurrentMonthPayments 
+                  ? `Payments already generated for ${currentMonth} ${currentYear}` 
+                  : `Generate ৳500 payments for all members for ${currentMonth} ${currentYear}`
+              }
             >
               <Calendar className="h-4 w-4 mr-2" />
-              Generate Monthly Dues
+              {hasCurrentMonthPayments 
+                ? `${currentMonth} Payments Generated ✓` 
+                : 'Generate Monthly Dues (৳500)'
+              }
             </Button>
           </div>
         </CardHeader>
         <CardContent>
+          <div className={`mb-4 p-3 rounded-lg border ${
+            hasCurrentMonthPayments 
+              ? 'bg-green-50 border-green-200' 
+              : 'bg-blue-50 border-blue-200'
+          }`}>
+            <p className={`text-sm ${
+              hasCurrentMonthPayments 
+                ? 'text-green-800' 
+                : 'text-blue-800'
+            }`}>
+              {hasCurrentMonthPayments ? (
+                <>
+                  <strong>✅ {currentMonth} {currentYear} Payments Generated:</strong> Monthly dues (৳500) have been created for {totalMembersWithCurrentPayments} members. 
+                  <br />
+                  <span className="text-green-600">Next generation available: {nextMonthName} {nextYear}</span>
+                </>
+              ) : (
+                <>
+                  <strong>Monthly Dues:</strong> Click "Generate Monthly Dues" to create ৳500 payment records for all members for {currentMonth} {currentYear}. This will only create new records - existing payments for the current month won't be duplicated.
+                </>
+              )}
+            </p>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -99,29 +151,37 @@ export default function PaymentManagement({
                     </td>
                     <td className="p-3">
                       {editingPayment === payment._id ? (
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={tempAmount}
-                          onChange={(e) => setTempAmount(Number(e.target.value))}
-                          className="w-24"
-                          onBlur={() => setEditingPayment(null)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handleAmountUpdate(payment._id!, tempAmount, payment.status);
-                            }
-                            if (e.key === 'Escape') {
-                              setEditingPayment(null);
-                            }
-                          }}
-                          autoFocus
-                        />
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm text-gray-600">৳</span>
+                          <Input
+                            type="number"
+                            step="1"
+                            min="0"
+                            value={tempAmount}
+                            onChange={(e) => setTempAmount(Number(e.target.value))}
+                            className="w-24"
+                            placeholder="Amount in BDT"
+                            onBlur={() => setEditingPayment(null)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleAmountUpdate(payment._id!, tempAmount, payment.status);
+                              }
+                              if (e.key === 'Escape') {
+                                setEditingPayment(null);
+                              }
+                            }}
+                            autoFocus
+                          />
+                        </div>
                       ) : (
                         <button
                           onClick={() => startEditing(payment)}
                           className="text-gray-900 hover:text-gray-700 font-medium"
                         >
-                          ${payment.amount}
+                          {formatCurrency(payment.amount)}
+                          {payment.isFirstPayment && (
+                            <span className="text-xs text-gray-500 ml-1">(Admission + Monthly)</span>
+                          )}
                         </button>
                       )}
                     </td>

@@ -174,16 +174,18 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="admissionFee">Admission Fee *</Label>
+              <Label htmlFor="admissionFee">Admission Fee (BDT) *</Label>
               <Input
                 id="admissionFee"
                 type="number"
-                step="0.01"
+                step="1"
+                min="0"
                 value={formData.admissionFee}
                 onChange={(e) => handleChange('admissionFee', e.target.value)}
-                placeholder="Enter admission fee"
+                placeholder="Enter admission fee in BDT (e.g., 2000)"
                 required
               />
+              <p className="text-sm text-gray-500">Note: Monthly fee is 500 BDT (added automatically)</p>
             </div>
 
             <div className="space-y-2">
