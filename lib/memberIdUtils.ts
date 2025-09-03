@@ -1,17 +1,16 @@
 // Utility functions for member ID management
 
 export function generateMemberId(): string {
-  const currentYear = new Date().getFullYear();
-  const randomNum = Math.floor(Math.random() * 9000) + 1000; // 4-digit number
-  return `GM${currentYear}${randomNum}`;
+  // This will be replaced by generateNextSequentialId in the component
+  // For now, return a placeholder that will trigger sequential generation
+  return 'BD0001';
 }
 
 export function generateNextSequentialId(existingMembers: any[]): string {
-  const currentYear = new Date().getFullYear();
-  const prefix = `GM${currentYear}`;
+  const prefix = 'BD';
   
-  // Find all members with current year prefix
-  const currentYearMembers = existingMembers
+  // Find all members with BD prefix
+  const bdMembers = existingMembers
     .filter(member => member.id.startsWith(prefix))
     .map(member => {
       const numPart = member.id.replace(prefix, '');
@@ -20,12 +19,28 @@ export function generateNextSequentialId(existingMembers: any[]): string {
     .sort((a, b) => b - a); // Sort descending
   
   // Get the next sequential number
-  const nextNum = currentYearMembers.length > 0 ? currentYearMembers[0] + 1 : 1001;
+  const nextNum = bdMembers.length > 0 ? bdMembers[0] + 1 : 1;
   
-  // Pad with zeros if needed (minimum 4 digits)
+  // Pad with zeros to make 4 digits (BD0001, BD0002, etc.)
   const paddedNum = nextNum.toString().padStart(4, '0');
   
   return `${prefix}${paddedNum}`;
+}
+
+export async function generateNextAvailableId(): Promise<string> {
+  try {
+    // Fetch all existing members to determine next sequential ID
+    const response = await fetch('/api/members');
+    if (response.ok) {
+      const members = await response.json();
+      return generateNextSequentialId(members);
+    }
+    // Fallback if API call fails
+    return 'BD0001';
+  } catch (error) {
+    console.error('Error fetching members for ID generation:', error);
+    return 'BD0001';
+  }
 }
 
 export async function checkMemberIdAvailability(memberId: string): Promise<{

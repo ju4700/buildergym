@@ -19,11 +19,10 @@ export async function GET(request: NextRequest) {
     if (existingMember) {
       // Generate a suggestion
       const allMembers = await Member.find({}, 'id').lean();
-      const currentYear = new Date().getFullYear();
-      const prefix = `GM${currentYear}`;
+      const prefix = 'BD';
       
       // Find next available sequential number
-      const currentYearMembers = allMembers
+      const bdMembers = allMembers
         .filter(member => member.id.startsWith(prefix))
         .map(member => {
           const numPart = member.id.replace(prefix, '');
@@ -31,7 +30,7 @@ export async function GET(request: NextRequest) {
         })
         .sort((a, b) => b - a);
       
-      const nextNum = currentYearMembers.length > 0 ? currentYearMembers[0] + 1 : 1001;
+      const nextNum = bdMembers.length > 0 ? bdMembers[0] + 1 : 1;
       const suggestion = `${prefix}${nextNum.toString().padStart(4, '0')}`;
       
       return NextResponse.json({ 

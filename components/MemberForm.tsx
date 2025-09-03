@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IMember } from '@/models/Member';
-import { generateMemberId, checkMemberIdAvailability } from '@/lib/memberIdUtils';
+import { generateMemberId, checkMemberIdAvailability, generateNextAvailableId } from '@/lib/memberIdUtils';
 
 interface MemberFormProps {
   member?: IMember;
@@ -45,9 +45,10 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
   // Auto-generate ID for new members
   useEffect(() => {
     if (!member) {
-      const autoId = generateMemberId();
-      setFormData(prev => ({ ...prev, id: autoId }));
-      checkIdAvailability(autoId);
+      generateNextAvailableId().then(autoId => {
+        setFormData(prev => ({ ...prev, id: autoId }));
+        checkIdAvailability(autoId);
+      });
     }
   }, [member]);
 
@@ -163,7 +164,7 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
                   id="id"
                   value={formData.id}
                   onChange={(e) => handleChange('id', e.target.value)}
-                  placeholder="Enter unique member ID"
+                  placeholder="Enter unique member ID (e.g., BD0001)"
                   required
                   disabled={!!member}
                   className={
