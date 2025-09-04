@@ -99,11 +99,7 @@ export default function LoginForm() {
             </Button>
           </form>
           
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              Demo Credentials: admin / gym2025admin
-            </p>
-          </div>
+          
         </CardContent>
       </Card>
     </div>
