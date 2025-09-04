@@ -1,6 +1,13 @@
 # BuilderGym - Gym Management System
 
-A modern, feature-rich gym management system designed for Bangladesh-based fitness centers.
+A modern, feature-rich gym management system designed for Bangladesh-based fitness centers with **admin authentication**.
+
+## 🔐 Authentication
+
+The system is now protected with admin authentication:
+- **Username**: `admin`
+- **Password**: `gym2025admin` (configurable via environment variables)
+- **Session**: 24-hour automatic logout for security
 
 ## Quick Start
 

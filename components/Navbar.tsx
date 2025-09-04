@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Users, DollarSign, Plus, BarChart3, Dumbbell } from 'lucide-react';
+import { Menu, X, Users, DollarSign, Plus, BarChart3, Dumbbell, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NavbarProps {
   activeTab: string;
@@ -11,6 +12,7 @@ interface NavbarProps {
 
 export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { logout } = useAuth();
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
@@ -46,6 +48,19 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
             ))}
           </div>
 
+          {/* Logout Button */}
+          <div className="hidden md:flex">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={logout}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
+
           {/* Mobile menu button */}
           <div className="md:hidden">
             <Button
@@ -79,6 +94,15 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
                   {item.label}
                 </button>
               ))}
+              
+              {/* Mobile Logout Button */}
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
             </div>
           </div>
         )}
