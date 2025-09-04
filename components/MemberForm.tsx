@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { IMember } from '@/models/Member';
 import { generateMemberId, checkMemberIdAvailability, generateNextAvailableId } from '@/lib/memberIdUtils';
 
@@ -26,9 +27,10 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
     referenceId: member?.referenceId || '',
     height: member?.height || '',
     weight: member?.weight || '',
-    admissionFee: member?.admissionFee || '',
-    normalFigure: member?.normalFigure || '',
-    fattyFigure: member?.fattyFigure || '',
+    admissionFee: member?.admissionFee || 2000, // Fixed admission fee
+    discountedFee: member?.discountedFee || '',
+    monthlySalary: member?.monthlySalary || '',
+    bodyType: member?.bodyType || '',
   });
 
   const [idStatus, setIdStatus] = useState<{
@@ -64,9 +66,10 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
       referenceId: member?.referenceId || '',
       height: member?.height || '',
       weight: member?.weight || '',
-      admissionFee: member?.admissionFee || '',
-      normalFigure: member?.normalFigure || '',
-      fattyFigure: member?.fattyFigure || '',
+      admissionFee: 2000, // Always fixed at 2000
+      discountedFee: member?.discountedFee || '',
+      monthlySalary: member?.monthlySalary || '',
+      bodyType: member?.bodyType || '',
     });
     
     // Reset ID status when switching between add/edit
@@ -140,6 +143,9 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
       height: Number(formData.height),
       weight: Number(formData.weight),
       admissionFee: Number(formData.admissionFee),
+      discountedFee: Number(formData.discountedFee),
+      monthlySalary: Number(formData.monthlySalary),
+      bodyType: formData.bodyType as 'Normal' | 'Fatty',
     });
   };
 
@@ -237,13 +243,25 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
 
             <div className="space-y-2">
               <Label htmlFor="bloodGroup">Blood Group *</Label>
-              <Input
-                id="bloodGroup"
+              <Select
                 value={formData.bloodGroup}
-                onChange={(e) => handleChange('bloodGroup', e.target.value)}
-                placeholder="e.g., A+, B-, O+"
+                onValueChange={(value) => handleChange('bloodGroup', value)}
                 required
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select blood group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A+">A+</SelectItem>
+                  <SelectItem value="A-">A-</SelectItem>
+                  <SelectItem value="B+">B+</SelectItem>
+                  <SelectItem value="B-">B-</SelectItem>
+                  <SelectItem value="AB+">AB+</SelectItem>
+                  <SelectItem value="AB-">AB-</SelectItem>
+                  <SelectItem value="O+">O+</SelectItem>
+                  <SelectItem value="O-">O-</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -313,34 +331,80 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
                 type="number"
                 step="1"
                 min="0"
-                value={formData.admissionFee}
-                onChange={(e) => handleChange('admissionFee', e.target.value)}
-                placeholder="Enter admission fee in BDT (e.g., 2000)"
+                value={2000}
+                disabled
+                className="bg-gray-100"
+                placeholder="Fixed admission fee"
                 required
               />
-              <p className="text-sm text-gray-500">Note: Monthly fee is 500 BDT (added automatically)</p>
+              <p className="text-sm text-gray-500">Fixed admission fee: ৳2000</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="normalFigure">Normal Figure *</Label>
+              <Label htmlFor="discountedFee">Discounted Fee (BDT) *</Label>
               <Input
-                id="normalFigure"
-                value={formData.normalFigure}
-                onChange={(e) => handleChange('normalFigure', e.target.value)}
-                placeholder="Enter normal figure"
+                id="discountedFee"
+                type="number"
+                step="1"
+                min="0"
+                value={formData.discountedFee}
+                onChange={(e) => handleChange('discountedFee', e.target.value)}
+                placeholder="Enter actual fee after discount (e.g., 1800)"
                 required
               />
+              <p className="text-sm text-gray-500">Actual admission amount to be paid (after any discount)</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="monthlySalary">Monthly Fee (BDT) *</Label>
+              <Input
+                id="monthlySalary"
+                type="number"
+                step="1"
+                min="0"
+                value={formData.monthlySalary}
+                onChange={(e) => handleChange('monthlySalary', e.target.value)}
+                placeholder="Enter monthly fee for this member (e.g., 500)"
+                required
+              />
+              <p className="text-sm text-gray-500">Individual monthly fee for this member</p>
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="fattyFigure">Fatty Figure *</Label>
-              <Input
-                id="fattyFigure"
-                value={formData.fattyFigure}
-                onChange={(e) => handleChange('fattyFigure', e.target.value)}
-                placeholder="Enter fatty figure"
-                required
-              />
+              <Label>Body Type *</Label>
+              <div className="flex space-x-6">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="normal"
+                    name="bodyType"
+                    value="Normal"
+                    checked={formData.bodyType === 'Normal'}
+                    onChange={(e) => handleChange('bodyType', e.target.value)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    required
+                  />
+                  <Label htmlFor="normal" className="text-sm font-normal cursor-pointer">
+                    Normal Figure
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="fatty"
+                    name="bodyType"
+                    value="Fatty"
+                    checked={formData.bodyType === 'Fatty'}
+                    onChange={(e) => handleChange('bodyType', e.target.value)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    required
+                  />
+                  <Label htmlFor="fatty" className="text-sm font-normal cursor-pointer">
+                    Fatty Figure
+                  </Label>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500">Select the member's body type classification</p>
             </div>
           </div>
 

@@ -27,17 +27,16 @@ export async function POST(request: NextRequest) {
     const member = new Member(body);
     await member.save();
 
-    // Create initial payment record for the admission month (admission fee + monthly fee)
+    // Create initial payment record for the admission month (discounted admission fee + monthly fee)
     const currentDate = new Date();
     const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
     const currentYear = currentDate.getFullYear();
-    const monthlyFee = 500; // Standard monthly fee in BDT
 
     const payment = new Payment({
       memberId: member.id,
       memberName: member.name,
-      amount: member.admissionFee + monthlyFee, // Admission fee + monthly fee for first payment
-      monthlyFee: monthlyFee,
+      amount: member.discountedFee + member.monthlySalary, // Discounted admission fee + individual monthly fee for first payment
+      monthlyFee: member.monthlySalary, // Use member's individual monthly fee
       dueDate: new Date(currentYear, currentDate.getMonth(), 1),
       month: currentMonth,
       year: currentYear,

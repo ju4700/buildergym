@@ -11,9 +11,10 @@ export interface IMember {
   referenceId: string;
   height: number;
   weight: number;
-  admissionFee: number;
-  normalFigure: string;
-  fattyFigure: string;
+  admissionFee: number; // Fixed at 2000
+  discountedFee: number; // Actual admission fee after discount
+  monthlySalary: number; // Individual monthly fee for this member
+  bodyType: 'Normal' | 'Fatty'; // Single selectable body type
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -59,15 +60,23 @@ const MemberSchema = new mongoose.Schema<IMember>({
   admissionFee: {
     type: Number,
     required: true,
-    // Admission fee in BDT (Bangladeshi Taka)
+    default: 2000, // Fixed admission fee in BDT
   },
-  normalFigure: {
+  discountedFee: {
+    type: Number,
+    required: true,
+    // Actual admission fee after discount
+  },
+  monthlySalary: {
+    type: Number,
+    required: true,
+    // Individual monthly fee for this member
+  },
+  bodyType: {
     type: String,
     required: true,
-  },
-  fattyFigure: {
-    type: String,
-    required: true,
+    enum: ['Normal', 'Fatty'],
+    // Single selectable body type option
   },
 }, {
   timestamps: true,

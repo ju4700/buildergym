@@ -88,13 +88,13 @@ export default function PaymentManagement({
               title={
                 hasCurrentMonthPayments 
                   ? `Payments already generated for ${currentMonth} ${currentYear}` 
-                  : `Generate ৳500 payments for all members for ${currentMonth} ${currentYear}`
+                  : `Generate monthly payments for all members for ${currentMonth} ${currentYear}`
               }
             >
               <Calendar className="h-4 w-4 mr-2" />
               {hasCurrentMonthPayments 
                 ? `${currentMonth} Payments Generated ✓` 
-                : 'Generate Monthly Dues (৳500)'
+                : 'Generate Monthly Dues'
               }
             </Button>
           </div>
@@ -112,13 +112,13 @@ export default function PaymentManagement({
             }`}>
               {hasCurrentMonthPayments ? (
                 <>
-                  <strong>✅ {currentMonth} {currentYear} Payments Generated:</strong> Monthly dues (৳500) have been created for {totalMembersWithCurrentPayments} members. 
+                  <strong>✅ {currentMonth} {currentYear} Payments Generated:</strong> Monthly dues have been created for {totalMembersWithCurrentPayments} members based on their individual monthly fees. 
                   <br />
                   <span className="text-green-600">Next generation available: {nextMonthName} {nextYear}</span>
                 </>
               ) : (
                 <>
-                  <strong>Monthly Dues:</strong> Click "Generate Monthly Dues" to create ৳500 payment records for all members for {currentMonth} {currentYear}. This will only create new records - existing payments for the current month won't be duplicated.
+                  <strong>Monthly Dues:</strong> Click "Generate Monthly Dues" to create payment records for all members for {currentMonth} {currentYear} based on their individual monthly fees. This will only create new records - existing payments for the current month won't be duplicated.
                 </>
               )}
             </p>

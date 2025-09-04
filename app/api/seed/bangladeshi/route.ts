@@ -17,8 +17,9 @@ const bangladeshiMembers = [
     height: 170,
     weight: 75,
     admissionFee: 2000,
-    normalFigure: '40-32-38',
-    fattyFigure: '15%'
+    discountedFee: 1800,
+    monthlySalary: 600,
+    bodyType: 'Normal' as const
   },
   {
     id: 'BGM002',
@@ -31,9 +32,10 @@ const bangladeshiMembers = [
     referenceId: 'REF002',
     height: 162,
     weight: 58,
-    admissionFee: 1800,
-    normalFigure: '36-28-36',
-    fattyFigure: '18%'
+    admissionFee: 2000,
+    discountedFee: 1800,
+    monthlySalary: 500,
+    bodyType: 'Fatty' as const
   },
   {
     id: 'BGM003',
@@ -46,9 +48,10 @@ const bangladeshiMembers = [
     referenceId: 'REF003',
     height: 175,
     weight: 82,
-    admissionFee: 2200,
-    normalFigure: '42-34-40',
-    fattyFigure: '12%'
+    admissionFee: 2000,
+    discountedFee: 2000,
+    monthlySalary: 650,
+    bodyType: 'Normal' as const
   },
   {
     id: 'BGM004',
@@ -61,9 +64,10 @@ const bangladeshiMembers = [
     referenceId: 'REF004',
     height: 165,
     weight: 63,
-    admissionFee: 1900,
-    normalFigure: '38-30-38',
-    fattyFigure: '20%'
+    admissionFee: 2000,
+    discountedFee: 1900,
+    monthlySalary: 550,
+    bodyType: 'Fatty' as const
   },
   {
     id: 'BGM005',
@@ -76,9 +80,10 @@ const bangladeshiMembers = [
     referenceId: 'REF005',
     height: 168,
     weight: 70,
-    admissionFee: 2100,
-    normalFigure: '38-30-36',
-    fattyFigure: '14%'
+    admissionFee: 2000,
+    discountedFee: 2000,
+    monthlySalary: 600,
+    bodyType: 'Normal' as const
   }
 ];
 

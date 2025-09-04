@@ -29,12 +29,12 @@ const PaymentSchema = new mongoose.Schema<IPayment>({
   amount: {
     type: Number,
     required: true,
-    default: 500, // Default monthly fee in BDT
+    // Total amount due (monthly fee + accumulated dues + admission if first payment)
   },
   monthlyFee: {
     type: Number,
     required: true,
-    default: 500, // Standard monthly fee in BDT
+    // Individual monthly fee for this specific member
   },
   dueDate: {
     type: Date,

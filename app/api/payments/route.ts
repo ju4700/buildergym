@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
     const currentDate = new Date();
     const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
     const currentYear = currentDate.getFullYear();
-    const monthlyFee = 500; // Standard monthly fee in BDT
     
     const members = await Member.find({});
     const generatedPayments = [];
@@ -35,7 +34,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (!existingPayment) {
-        // Calculate accumulated unpaid amounts from previous months
+        // Calculate accumulated unpaid amounts from previous months (excluding monthly fees from accumulated amounts)
         const unpaidPayments = await Payment.find({
           memberId: member.id,
           status: 'due',
@@ -48,17 +47,17 @@ export async function POST(request: NextRequest) {
           ]
         });
 
-        // Calculate total unpaid amount
+        // Calculate total unpaid amount from previous months
         const totalUnpaidAmount = unpaidPayments.reduce((sum, payment) => sum + payment.amount, 0);
         
-        // New payment amount = monthly fee + accumulated unpaid amount
-        const newPaymentAmount = monthlyFee + totalUnpaidAmount;
+        // New payment amount = member's individual monthly fee + accumulated unpaid amount
+        const newPaymentAmount = member.monthlySalary + totalUnpaidAmount;
 
         const payment = new Payment({
           memberId: member.id,
           memberName: member.name,
-          amount: newPaymentAmount, // Monthly fee + accumulated unpaid amounts
-          monthlyFee: monthlyFee, // Keep track of the base monthly fee
+          amount: newPaymentAmount, // Member's monthly fee + accumulated unpaid amounts
+          monthlyFee: member.monthlySalary, // Use member's individual monthly fee
           dueDate: new Date(currentYear, currentDate.getMonth(), 1),
           month: currentMonth,
           year: currentYear,
