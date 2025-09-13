@@ -7,13 +7,10 @@ import Dashboard from '@/components/Dashboard';
 import MemberForm from '@/components/MemberForm';
 import MembersTable from '@/components/MembersTable';
 import PaymentManagement from '@/components/PaymentManagement';
-import LoginForm from '@/components/LoginForm';
 import { IMember } from '@/models/Member';
 import { IPayment } from '@/models/Payment';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
-  const { isAuthenticated, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [members, setMembers] = useState<IMember[]>([]);
   const [payments, setPayments] = useState<IPayment[]>([]);
@@ -21,11 +18,9 @@ export default function Home() {
   const [editingMember, setEditingMember] = useState<IMember | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchMembers();
-      fetchPayments();
-    }
-  }, [isAuthenticated]);
+    fetchMembers();
+    fetchPayments();
+  }, []);
 
   const fetchMembers = async () => {
     try {
@@ -187,23 +182,6 @@ export default function Home() {
     }
     setActiveTab(tab);
   };
-
-  // Show loading spinner while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show login form if not authenticated
-  if (!isAuthenticated) {
-    return <LoginForm />;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
