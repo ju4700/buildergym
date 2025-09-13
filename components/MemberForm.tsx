@@ -31,7 +31,10 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
     discountedFee: member?.discountedFee || '',
     monthlySalary: member?.monthlySalary || '',
     bodyType: member?.bodyType || '',
+    image: member?.image || '',
   });
+
+  const [imagePreview, setImagePreview] = useState<string>(member?.image || '');
 
   const [idStatus, setIdStatus] = useState<{
     isChecking: boolean;
@@ -70,7 +73,10 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
       discountedFee: member?.discountedFee || '',
       monthlySalary: member?.monthlySalary || '',
       bodyType: member?.bodyType || '',
+      image: member?.image || '',
     });
+    
+    setImagePreview(member?.image || '');
     
     // Reset ID status when switching between add/edit
     if (member) {
@@ -127,6 +133,36 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setFormData(prev => ({ ...prev, image: base64String }));
+        setImagePreview(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData(prev => ({ ...prev, image: '' }));
+    setImagePreview('');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -146,6 +182,7 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
       discountedFee: Number(formData.discountedFee),
       monthlySalary: Number(formData.monthlySalary),
       bodyType: formData.bodyType as 'Normal' | 'Fatty',
+      image: formData.image,
     });
   };
 
@@ -162,6 +199,65 @@ export default function MemberForm({ member, onSubmit, onCancel, isLoading }: Me
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Member Photo Section - Top of Form */}
+          <div className="flex justify-center mb-8">
+            <div className="space-y-4">
+              <Label className="text-lg font-semibold">Member Photo</Label>
+              <div className="flex flex-col items-center space-y-4">
+                {/* Square Image Preview with Click to Upload */}
+                <div 
+                  className="relative w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center hover:border-gray-400 transition-colors cursor-pointer group"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                >
+                  {imagePreview ? (
+                    <>
+                      <img
+                        src={imagePreview}
+                        alt="Member preview"
+                        className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                        <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium">
+                          Click to change
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeImage();
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove image"
+                      >
+                        ×
+                      </button>
+                    </>
+                  ) : (
+                    <div className="text-center p-4 group-hover:text-gray-600 transition-colors">
+                      <div className="text-gray-400 group-hover:text-gray-500 text-3xl mb-2">📷</div>
+                      <div className="text-gray-500 group-hover:text-gray-600 text-sm font-medium">Click to upload</div>
+                      <div className="text-gray-400 text-xs mt-1">Max 5MB</div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Hidden File Input */}
+                <Input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                
+                <p className="text-xs text-gray-500 text-center max-w-xs">
+                  JPG, PNG, GIF supported • Click the image area to select a photo
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="id">Member ID *</Label>

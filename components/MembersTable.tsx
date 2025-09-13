@@ -68,6 +68,7 @@ export default function MembersTable({ members, payments, onEdit, onDelete, isLo
             <thead>
               <tr className="border-b">
                 <th className="text-left p-3 font-semibold text-gray-900">ID</th>
+                <th className="text-left p-3 font-semibold text-gray-900">Photo</th>
                 <th className="text-left p-3 font-semibold text-gray-900">Name</th>
                 <th className="text-left p-3 font-semibold text-gray-900 hidden sm:table-cell">Mobile</th>
                 <th className="text-left p-3 font-semibold text-gray-900 hidden md:table-cell">Blood Group</th>
@@ -82,6 +83,21 @@ export default function MembersTable({ members, payments, onEdit, onDelete, isLo
               {filteredMembers.map((member) => (
                 <tr key={member._id} className="border-b hover:bg-gray-50 transition-colors">
                   <td className="p-3 font-medium text-gray-900">{member.id}</td>
+                  <td className="p-3">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+                      {member.image ? (
+                        <img
+                          src={member.image}
+                          alt={`${member.name} photo`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-gray-400 text-xs text-center">
+                          <div className="text-lg">👤</div>
+                        </div>
+                      )}
+                    </div>
+                  </td>
                   <td className="p-3">
                     <div>
                       <div className="font-medium text-gray-900">{member.name}</div>

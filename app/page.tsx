@@ -10,6 +10,20 @@ import PaymentManagement from '@/components/PaymentManagement';
 import { IMember } from '@/models/Member';
 import { IPayment } from '@/models/Payment';
 
+// Enhanced toast notifications with better UX
+const showToast = {
+  success: (message: string) => toast.success(message, { 
+    duration: 3000,
+    position: 'top-right',
+    dismissible: true,
+  }),
+  error: (message: string) => toast.error(message, { 
+    duration: 4000,
+    position: 'top-right',
+    dismissible: true,
+  }),
+};
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [members, setMembers] = useState<IMember[]>([]);
@@ -30,7 +44,8 @@ export default function Home() {
         setMembers(data);
       }
     } catch (error) {
-      toast.error('Failed to fetch members');
+      console.error('Error fetching members:', error);
+      showToast.error('Failed to fetch members');
     }
   };
 
@@ -42,7 +57,7 @@ export default function Home() {
         setPayments(data);
       }
     } catch (error) {
-      toast.error('Failed to fetch payments');
+      showToast.error('Failed to fetch payments');
     }
   };
 
@@ -59,13 +74,13 @@ export default function Home() {
         await fetchMembers();
         await fetchPayments();
         setActiveTab('members');
-        toast.success('Member added successfully');
+        showToast.success('Member added successfully');
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Failed to add member');
+        showToast.error(error.error || 'Failed to add member');
       }
     } catch (error) {
-      toast.error('Failed to add member');
+      showToast.error('Failed to add member');
     } finally {
       setIsLoading(false);
     }
@@ -87,12 +102,12 @@ export default function Home() {
         await fetchPayments();
         setEditingMember(null);
         setActiveTab('members');
-        toast.success('Member updated successfully');
+        showToast.success('Member updated successfully');
       } else {
-        toast.error('Failed to update member');
+        showToast.error('Failed to update member');
       }
     } catch (error) {
-      toast.error('Failed to update member');
+      showToast.error('Failed to update member');
     } finally {
       setIsLoading(false);
     }
@@ -111,12 +126,12 @@ export default function Home() {
       if (response.ok) {
         await fetchMembers();
         await fetchPayments();
-        toast.success('Member deleted successfully');
+        showToast.success('Member deleted successfully');
       } else {
-        toast.error('Failed to delete member');
+        showToast.error('Failed to delete member');
       }
     } catch (error) {
-      toast.error('Failed to delete member');
+      showToast.error('Failed to delete member');
     }
   };
 
@@ -135,12 +150,12 @@ export default function Home() {
 
       if (response.ok) {
         await fetchPayments();
-        toast.success(`Payment marked as ${status}`);
+        showToast.success(`Payment marked as ${status}`);
       } else {
-        toast.error('Failed to update payment');
+        showToast.error('Failed to update payment');
       }
     } catch (error) {
-      toast.error('Failed to update payment');
+      showToast.error('Failed to update payment');
     }
   };
 
@@ -154,12 +169,12 @@ export default function Home() {
       if (response.ok) {
         const result = await response.json();
         await fetchPayments();
-        toast.success(result.message);
+        showToast.success(result.message);
       } else {
-        toast.error('Failed to generate monthly dues');
+        showToast.error('Failed to generate monthly dues');
       }
     } catch (error) {
-      toast.error('Failed to generate monthly dues');
+      showToast.error('Failed to generate monthly dues');
     } finally {
       setIsLoading(false);
     }

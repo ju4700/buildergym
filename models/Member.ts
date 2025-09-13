@@ -15,6 +15,7 @@ export interface IMember {
   discountedFee: number; // Actual admission fee after discount
   monthlySalary: number; // Individual monthly fee for this member
   bodyType: 'Normal' | 'Fatty'; // Single selectable body type
+  image?: string; // Base64 encoded image data
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -77,6 +78,11 @@ const MemberSchema = new mongoose.Schema<IMember>({
     required: true,
     enum: ['Normal', 'Fatty'],
     // Single selectable body type option
+  },
+  image: {
+    type: String,
+    required: false,
+    // Base64 encoded image data
   },
 }, {
   timestamps: true,
